@@ -7,6 +7,7 @@
 
 import { Command } from 'commander'
 import { analyzeProject } from './package-json'
+import { scanImports } from './import-scanner'
 import { ProjectConfig } from './types'
 
 const program = new Command()
@@ -56,9 +57,51 @@ program
         return
       }
 
-      // TODO: Steps 2-5 will be implemented next
+      // Step 2: Import Scanning
+      console.log('\nScanning for imports...')
+      const excludePatterns = options.exclude
+        ? options.exclude.split(',').map((p: string) => p.trim())
+        : []
+      const includePatterns = options.include
+        ? options.include.split(',').map((p: string) => p.trim())
+        : []
+
+      const imports = await scanImports(
+        config,
+        excludePatterns,
+        includePatterns
+      )
+
+      console.log(`Found ${imports.length} import statements`)
+
+      // Group imports by package
+      const importsByPackage = new Map<string, typeof imports>()
+      for (const imp of imports) {
+        if (!importsByPackage.has(imp.packageName)) {
+          importsByPackage.set(imp.packageName, [])
+        }
+        importsByPackage.get(imp.packageName)!.push(imp)
+      }
+
+      console.log(`Found ${importsByPackage.size} unique packages imported`)
+
+      // Show summary
+      const typeOnlyPackages = Array.from(importsByPackage.entries())
+        .filter(([_, imports]) => imports.every((i) => i.isTypeOnly))
+        .map(([pkg]) => pkg)
+
+      if (typeOnlyPackages.length > 0) {
+        console.log(
+          `\nPackages with only type imports: ${typeOnlyPackages.length}`
+        )
+        if (typeOnlyPackages.length <= 10) {
+          typeOnlyPackages.forEach((pkg) => console.log(`  - ${pkg}`))
+        }
+      }
+
+      // TODO: Steps 3-5 will be implemented next
       console.log(
-        '\nProject analysis complete. Import scanning and dependency classification coming in next steps...'
+        '\nImport scanning complete. Dependency classification coming in next steps...'
       )
     } catch (error) {
       if (error instanceof Error) {
