@@ -8,6 +8,7 @@
 import { Command } from 'commander'
 import { analyzeProject } from './package-json'
 import { scanImports } from './import-scanner'
+import { analyzeDependencies } from './analyzer'
 import { ProjectConfig } from './types'
 
 const program = new Command()
@@ -85,23 +86,31 @@ program
 
       console.log(`Found ${importsByPackage.size} unique packages imported`)
 
-      // Show summary
-      const typeOnlyPackages = Array.from(importsByPackage.entries())
-        .filter(([_, imports]) => imports.every((i) => i.isTypeOnly))
-        .map(([pkg]) => pkg)
+      // Step 3: Dependency Classification
+      console.log('\nAnalyzing dependency usage...')
+      const analysisResult = analyzeDependencies(config, imports)
 
-      if (typeOnlyPackages.length > 0) {
-        console.log(
-          `\nPackages with only type imports: ${typeOnlyPackages.length}`
-        )
-        if (typeOnlyPackages.length <= 10) {
-          typeOnlyPackages.forEach((pkg) => console.log(`  - ${pkg}`))
-        }
+      console.log(
+        `\nAnalysis complete: ${analysisResult.canMoveCount} of ${analysisResult.totalDependencies} dependencies can be moved to devDependencies`
+      )
+
+      if (analysisResult.packagesToMove.length > 0) {
+        console.log('\nPackages that can be moved to devDependencies:')
+        analysisResult.packagesToMove.forEach((pkg) => {
+          console.log(`  - ${pkg.packageName}: ${pkg.reason}`)
+        })
       }
 
-      // TODO: Steps 3-5 will be implemented next
+      if (analysisResult.packagesToKeep.length > 0) {
+        console.log('\nPackages that should stay in dependencies:')
+        analysisResult.packagesToKeep.forEach((pkg) => {
+          console.log(`  - ${pkg.packageName}: ${pkg.reason}`)
+        })
+      }
+
+      // TODO: Steps 4-5 will be implemented next
       console.log(
-        '\nImport scanning complete. Dependency classification coming in next steps...'
+        '\nDependency classification complete. Reporting and auto-fix coming in next steps...'
       )
     } catch (error) {
       if (error instanceof Error) {
