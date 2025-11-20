@@ -9,6 +9,7 @@ import { Command } from 'commander'
 import { analyzeProject } from './package-json'
 import { scanImports } from './import-scanner'
 import { analyzeDependencies } from './analyzer'
+import { printReport, printCompactReport, generateJsonReport } from './reporter'
 import { ProjectConfig } from './types'
 
 const program = new Command()
@@ -21,6 +22,7 @@ program
   .version('0.1.0')
   .option('--fix', 'Automatically move packages to devDependencies')
   .option('--json', 'Output results as JSON')
+  .option('--verbose', 'Show detailed information about each package')
   .option(
     '--exclude <paths>',
     'Exclude paths from analysis (glob patterns)',
@@ -90,28 +92,22 @@ program
       console.log('\nAnalyzing dependency usage...')
       const analysisResult = analyzeDependencies(config, imports)
 
-      console.log(
-        `\nAnalysis complete: ${analysisResult.canMoveCount} of ${analysisResult.totalDependencies} dependencies can be moved to devDependencies`
-      )
-
-      if (analysisResult.packagesToMove.length > 0) {
-        console.log('\nPackages that can be moved to devDependencies:')
-        analysisResult.packagesToMove.forEach((pkg) => {
-          console.log(`  - ${pkg.packageName}: ${pkg.reason}`)
-        })
+      // Step 4: Reporting
+      if (options.json) {
+        // JSON output
+        console.log(generateJsonReport(analysisResult))
+      } else if (options.verbose) {
+        // Verbose human-readable report
+        printReport(analysisResult, true)
+      } else {
+        // Compact human-readable report
+        printCompactReport(analysisResult)
       }
 
-      if (analysisResult.packagesToKeep.length > 0) {
-        console.log('\nPackages that should stay in dependencies:')
-        analysisResult.packagesToKeep.forEach((pkg) => {
-          console.log(`  - ${pkg.packageName}: ${pkg.reason}`)
-        })
+      // Exit with appropriate code
+      if (analysisResult.canMoveCount > 0 && !options.fix) {
+        process.exit(0)
       }
-
-      // TODO: Steps 4-5 will be implemented next
-      console.log(
-        '\nDependency classification complete. Reporting and auto-fix coming in next steps...'
-      )
     } catch (error) {
       if (error instanceof Error) {
         console.error('Error:', error.message)
