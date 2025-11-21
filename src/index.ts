@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * devsort - CLI entry point
+ * depsort - CLI entry point
  * Analyzes TypeScript/JavaScript projects to identify dependencies that can be moved to devDependencies
  */
 
@@ -19,7 +19,7 @@ import { ProjectConfig } from './types'
 const program = new Command()
 
 program
-  .name('devsort')
+  .name('depsort')
   .description(
     'Identify dependencies that can be safely moved to devDependencies'
   )

@@ -1,10 +1,10 @@
 {
-  "name": "devsort",
+  "name": "depsort",
   "version": "0.1.0",
   "description": "CLI tool to identify dependencies that can be safely moved to devDependencies",
   "main": "dist/index.js",
   "bin": {
-    "devsort": "./dist/index.js"
+    "depsort": "./dist/index.js"
   },
   "scripts": {
     "build": "tsc",
@@ -35,4 +35,3 @@
     "ts-node": "^10.9.2"
   }
 }
-

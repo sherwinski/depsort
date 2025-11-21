@@ -1,5 +1,5 @@
 /**
- * Type definitions for devsort
+ * Type definitions for depsort
  */
 
 export interface PackageJson {

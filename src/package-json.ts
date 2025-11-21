@@ -113,7 +113,7 @@ export function analyzeProject(rootDir?: string): ProjectConfig {
 
   if (!packageJsonPath) {
     throw new Error(
-      'package.json not found. Please run devsort from a project directory.'
+      'package.json not found. Please run depsort from a project directory.'
     )
   }
 

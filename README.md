@@ -1,23 +1,23 @@
-# devsort
+# depsort
 
 A CLI tool that helps TypeScript library and app developers identify if packages in their dependencies can be safely moved to devDependencies. This helps end users save on their project bundle size by not importing unneeded dependencies.
 
 ## Installation
 
 ```bash
-npm install -g devsort
+npm install -g depsort
 ```
 
 Or use with npx:
 
 ```bash
-npx devsort
+npx depsort
 ```
 
 ## Usage
 
 ```bash
-devsort [options]
+depsort [options]
 
 Options:
   --fix              Automatically move packages to devDependencies
@@ -29,7 +29,7 @@ Options:
 
 ## How it works
 
-devsort analyzes your TypeScript/JavaScript project to:
+depsort analyzes your TypeScript/JavaScript project to:
 
 1. Parse your `package.json` dependencies
 2. Scan all source files for imports
