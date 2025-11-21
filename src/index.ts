@@ -6,7 +6,11 @@
  */
 
 import { Command } from 'commander'
-import { analyzeProject } from './package-json'
+import {
+  analyzeProject,
+  writePackageJson,
+  movePackagesToDevDependencies,
+} from './package-json'
 import { scanImports } from './import-scanner'
 import { analyzeDependencies } from './analyzer'
 import { printReport, printCompactReport, generateJsonReport } from './reporter'
@@ -104,9 +108,41 @@ program
         printCompactReport(analysisResult)
       }
 
-      // Exit with appropriate code
-      if (analysisResult.canMoveCount > 0 && !options.fix) {
-        process.exit(0)
+      // Step 5: Auto-fix (move dependencies to devDependencies)
+      if (options.fix) {
+        if (analysisResult.canMoveCount === 0) {
+          console.log('\n✅ No changes to apply with --fix.')
+        } else {
+          console.log('\n🔧 Applying changes to package.json...')
+
+          const packagesToMove = analysisResult.packagesToMove.map(
+            (pkg) => pkg.packageName
+          )
+
+          const { updated, moved } = movePackagesToDevDependencies(
+            config.packageJson,
+            packagesToMove
+          )
+
+          if (moved.length === 0) {
+            console.log('  No packages were moved (they may already be in devDependencies).')
+          } else {
+            for (const pkg of moved) {
+              console.log(
+                `  ✓ Moved ${pkg.name}@${pkg.version} to devDependencies`
+              )
+            }
+
+            writePackageJson(config.packageJsonPath, updated)
+            console.log(`\n✅ Successfully moved ${moved.length} package(s) to devDependencies.`)
+            console.log('   package.json has been updated.')
+          }
+        }
+      } else if (analysisResult.canMoveCount > 0) {
+        // Show hint if there are packages to move but --fix wasn't used
+        console.log(
+          `\n💡 Tip: Run with --fix to automatically move ${analysisResult.canMoveCount} package(s) to devDependencies`
+        )
       }
     } catch (error) {
       if (error instanceof Error) {
