@@ -3,13 +3,20 @@
   "version": "0.1.0",
   "description": "CLI tool to identify dependencies that can be safely moved to devDependencies",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "bin": {
     "depsort": "./dist/index.js"
   },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE.md"
+  ],
   "scripts": {
     "build": "tsc",
     "dev": "ts-node src/index.ts",
-    "test": "jest"
+    "test": "jest",
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "dependencies",
@@ -18,8 +25,12 @@
     "typescript",
     "optimization"
   ],
-  "author": "",
+  "author": "sherwinski",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sherwinski/depsort"
+  },
   "dependencies": {
     "commander": "^11.1.0",
     "glob": "^10.3.10",
